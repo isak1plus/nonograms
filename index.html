@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<title>Flower Nonogram 35x35 — Unsolved</title>
+<title>Christmas Tree — 35x35 Nonogram</title>
 <style>
   body { font-family: Arial, sans-serif; background: #f0f4f8; display: flex; flex-direction: column; align-items: center; padding: 30px 10px; margin: 0; }
   h1 { font-size: 22px; font-weight: 700; color: #2d3748; margin-bottom: 4px; }
@@ -22,7 +22,7 @@
 </style>
 </head>
 <body>
-<h1>Flower — 35x35 Nonogram</h1>
+<h1>Christmas Tree — 35x35 Nonogram</h1>
 <p>Click to fill · Right-click to mark X · Drag to paint</p>
 <div class="controls">
   <span class="mode-label">Mode:</span>
@@ -33,73 +33,54 @@
 </div>
 <div id="result-msg"></div>
 <canvas id="c"></canvas>
-
 <script>
-const rowClues = [[0],[0],[0],[5],[5],[5,5,5],[6,5,6],[6,5,6],[6,1,6],[5,5,5],[6,7,6],[6,7,6],[6,9,6],[6,7,6],[6,7,6],[5,5,5],[6,1,6],[6,5,6],[6,5,6],[5,5,5],[5],[5],[2],[2],[2],[16],[14],[12],[10],[8],[2],[2],[2],[2],[2]];
-const colClues = [[0],[0],[0],[0],[0],[0],[5],[5],[3,5,3],[15],[15,1],[15,2],[5,5,3],[5,1,5,4],[5,5],[5,7,5,5],[5,7,5,5],[32],[5,7,18],[5,7,5,5],[5,5],[5,1,5,5],[5,5,4],[15,3],[15,2],[15,1],[3,5,3],[5],[5],[0],[0],[0],[0],[0],[0]];
-const solution = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]];
-
+const rowClues = [[1], [3], [1], [3], [5], [7], [9], [11], [2, 7, 2], [11], [13], [15], [17], [19], [3, 13, 3], [23], [19], [21], [2, 17, 2], [25], [27], [29], [31], [33], [35], [5], [5], [5], [5], [9], [9], [9], [9], [13], [13]];
+const colClues = [[1], [2], [3], [4], [5], [6], [1, 7], [2, 8], [5, 6], [13], [3, 10], [1, 15, 2], [18, 2], [2, 16, 6], [20, 6], [31], [1, 32], [35], [1, 32], [31], [20, 6], [2, 16, 6], [18, 2], [1, 15, 2], [3, 10], [13], [5, 6], [2, 8], [1, 7], [6], [5], [4], [3], [2], [1]];
+const solution = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0], [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0], [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0], [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]];
 const ROWS = 35, COLS = 35;
 const CS = 18;
 const maxColH = Math.max(...colClues.map(c => c.length));
 const CLUE_H = maxColH * 16 + 8;
 const CLUE_W = 72;
-
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 const DPR = window.devicePixelRatio || 2;
 const W = CLUE_W + COLS * CS;
 const H = CLUE_H + ROWS * CS;
-canvas.width  = W * DPR;
+canvas.width = W * DPR;
 canvas.height = H * DPR;
-canvas.style.width  = W + 'px';
+canvas.style.width = W + 'px';
 canvas.style.height = H + 'px';
 ctx.scale(DPR, DPR);
-
 let state = Array.from({length: ROWS}, () => Array(COLS).fill(0));
-let mode = 'fill';
-let painting = false, paintVal = null;
-
+let mode = 'fill', painting = false, paintVal = null;
 function setMode(m) {
   mode = m;
   document.getElementById('btn-fill').className = 'btn' + (m==='fill' ? ' mode-fill' : '');
   document.getElementById('btn-cross').className = 'btn' + (m==='cross' ? ' mode-cross' : '');
 }
-
-function resetGrid() {
-  state = Array.from({length: ROWS}, () => Array(COLS).fill(0));
-  draw();
-}
-
+function resetGrid() { state = Array.from({length: ROWS}, () => Array(COLS).fill(0)); draw(); }
 function checkSolution() {
   let wrong = 0;
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++)
-      if ((state[r][c] === 1 ? 1 : 0) !== solution[r][c]) wrong++;
+      if (solution[r][c] === 1 && state[r][c] !== 1) wrong++;
   const msg = document.getElementById('result-msg');
   if (wrong === 0) { msg.className = 'correct'; msg.textContent = 'Correct! You solved it perfectly!'; }
-  else { msg.className = 'wrong'; msg.textContent = `Not quite — ${wrong} cell${wrong > 1 ? 's are' : ' is'} wrong. Keep going!`; }
+  else { msg.className = 'wrong'; msg.textContent = `Not quite — ${wrong} filled cell${wrong > 1 ? 's are' : ' is'} missing. Keep going!`; }
 }
-
 function draw() {
   ctx.clearRect(0, 0, W, H);
-
-  // Clue background
   ctx.fillStyle = '#edf2f7';
   ctx.fillRect(0, 0, W, CLUE_H);
   ctx.fillRect(0, 0, CLUE_W, H);
-
-  // Draw grid cells
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
-      const x = CLUE_W + c * CS;
-      const y = CLUE_H + r * CS;
-      const v = state[r][c];
+      const x = CLUE_W + c * CS, y = CLUE_H + r * CS, v = state[r][c];
       ctx.fillStyle = v === 1 ? '#2d3748' : '#ffffff';
       ctx.fillRect(x + 0.5, y + 0.5, CS - 1, CS - 1);
       if (v === 2) {
-        ctx.strokeStyle = '#e53e3e';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#e53e3e'; ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.moveTo(x+3, y+3); ctx.lineTo(x+CS-3, y+CS-3);
         ctx.moveTo(x+CS-3, y+3); ctx.lineTo(x+3, y+CS-3);
@@ -107,10 +88,7 @@ function draw() {
       }
     }
   }
-
-  // Thin grid lines
-  ctx.strokeStyle = '#cbd5e0';
-  ctx.lineWidth = 0.5;
+  ctx.strokeStyle = '#cbd5e0'; ctx.lineWidth = 0.5;
   for (let r = 0; r <= ROWS; r++) {
     const y = CLUE_H + r * CS;
     ctx.beginPath(); ctx.moveTo(CLUE_W, y); ctx.lineTo(CLUE_W + COLS * CS, y); ctx.stroke();
@@ -119,10 +97,7 @@ function draw() {
     const x = CLUE_W + c * CS;
     ctx.beginPath(); ctx.moveTo(x, CLUE_H); ctx.lineTo(x, CLUE_H + ROWS * CS); ctx.stroke();
   }
-
-  // Thick lines every 5
-  ctx.strokeStyle = '#4a5568';
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#4a5568'; ctx.lineWidth = 2;
   for (let i = 0; i <= ROWS; i += 5) {
     const y = CLUE_H + i * CS;
     ctx.beginPath(); ctx.moveTo(CLUE_W, y); ctx.lineTo(CLUE_W + COLS * CS, y); ctx.stroke();
@@ -131,24 +106,15 @@ function draw() {
     const x = CLUE_W + j * CS;
     ctx.beginPath(); ctx.moveTo(x, CLUE_H); ctx.lineTo(x, CLUE_H + ROWS * CS); ctx.stroke();
   }
-
-  // Outer border
-  ctx.strokeStyle = '#2d3748';
-  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = '#2d3748'; ctx.lineWidth = 2.5;
   ctx.strokeRect(CLUE_W, CLUE_H, COLS * CS, ROWS * CS);
-
-  // Row clues
-  ctx.font = 'bold 11px Arial';
-  ctx.textAlign = 'right';
-  ctx.textBaseline = 'middle';
+  ctx.font = 'bold 11px Arial'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
   for (let r = 0; r < ROWS; r++) {
     const y = CLUE_H + r * CS + CS / 2;
     const nums = rowClues[r];
     ctx.fillStyle = nums[0] === 0 ? '#a0aec0' : '#2d3748';
     ctx.fillText(nums.join(' '), CLUE_W - 4, y);
   }
-
-  // Col clues
   ctx.textAlign = 'center';
   for (let c = 0; c < COLS; c++) {
     const x = CLUE_W + c * CS + CS / 2;
@@ -160,43 +126,31 @@ function draw() {
     }
   }
 }
-
 function getCellFromEvent(e) {
   const rect = canvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-  const c = Math.floor((mx - CLUE_W) / CS);
-  const r = Math.floor((my - CLUE_H) / CS);
+  const c = Math.floor((e.clientX - rect.left - CLUE_W) / CS);
+  const r = Math.floor((e.clientY - rect.top - CLUE_H) / CS);
   if (r >= 0 && r < ROWS && c >= 0 && c < COLS) return {r, c};
   return null;
 }
-
 canvas.addEventListener('mousedown', e => {
-  if (e.button !== 0) return;
-  e.preventDefault();
-  painting = true;
-  const cell = getCellFromEvent(e);
-  if (!cell) return;
+  if (e.button !== 0) return; e.preventDefault(); painting = true;
+  const cell = getCellFromEvent(e); if (!cell) return;
   paintVal = mode === 'fill' ? (state[cell.r][cell.c] === 1 ? 0 : 1) : (state[cell.r][cell.c] === 2 ? 0 : 2);
-  state[cell.r][cell.c] = paintVal;
-  draw();
+  state[cell.r][cell.c] = paintVal; draw();
 });
 canvas.addEventListener('mousemove', e => {
   if (!painting) return;
   const cell = getCellFromEvent(e);
   if (!cell || state[cell.r][cell.c] === paintVal) return;
-  state[cell.r][cell.c] = paintVal;
-  draw();
+  state[cell.r][cell.c] = paintVal; draw();
 });
 canvas.addEventListener('contextmenu', e => {
   e.preventDefault();
-  const cell = getCellFromEvent(e);
-  if (!cell) return;
-  state[cell.r][cell.c] = state[cell.r][cell.c] === 2 ? 0 : 2;
-  draw();
+  const cell = getCellFromEvent(e); if (!cell) return;
+  state[cell.r][cell.c] = state[cell.r][cell.c] === 2 ? 0 : 2; draw();
 });
 document.addEventListener('mouseup', () => { painting = false; paintVal = null; });
-
 draw();
 </script>
 </body>
