@@ -9,14 +9,19 @@
   p { font-size: 14px; color: #718096; margin-bottom: 24px; }
   .wrap { overflow: auto; max-width: 100%; }
   table { border-collapse: collapse; }
-  td { width: 18px; height: 18px; min-width: 18px; font-size: 9px; text-align: center; vertical-align: middle; }
+  td { width: 18px; height: 18px; min-width: 18px; max-width: 18px; min-height: 18px; max-height: 18px; font-size: 9px; text-align: center; vertical-align: middle; padding: 0; }
+  table { border-collapse: collapse; table-layout: fixed; }
   td.empty-cell { background: #fff; border: 1px solid #cbd5e0; cursor: pointer; }
   td.empty-cell:hover { background: #bee3f8; }
   td.filled-cell { background: #2d3748; border: 1px solid #2d3748; cursor: pointer; }
   td.crossed { background: #fff; border: 1px solid #cbd5e0; cursor: pointer; color: #e53e3e; font-size: 13px; font-weight: 700; }
+  .bt { border-top: 2.5px solid #4a5568 !important; }
+  .bl { border-left: 2.5px solid #4a5568 !important; }
+  .br { border-right: 2.5px solid #4a5568 !important; }
+  .bb { border-bottom: 2.5px solid #4a5568 !important; }
   td.clue { background: #edf2f7; color: #2d3748; font-size: 9px; font-weight: 700; padding: 1px 4px; white-space: nowrap; }
-  td.col-clue { vertical-align: bottom; padding-bottom: 4px; min-width: 18px; }
-  td.row-clue { text-align: right; padding-right: 6px; min-width: 52px; }
+  td.col-clue { vertical-align: bottom; padding-bottom: 4px; width: 18px; max-width: 18px; overflow: hidden; }
+  td.row-clue { text-align: right; padding-right: 6px; width: 56px; min-width: 56px; max-width: 56px; }
   td.zero { color: #a0aec0; }
   td.corner { background: #edf2f7; }
   .controls { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center; }
@@ -132,6 +137,13 @@ function buildTable() {
       td.dataset.r = r;
       td.dataset.c = c;
       td.className = 'empty-cell';
+      // thick borders every 5 cells
+      let extra = '';
+      if (r % 5 === 0) extra += ' bt';
+      if (c % 5 === 0) extra += ' bl';
+      if (r === ROWS - 1) extra += ' bb';
+      if (c === COLS - 1) extra += ' br';
+      td.className = 'empty-cell' + extra;
       td.addEventListener('mousedown', onDown);
       td.addEventListener('mouseover', onOver);
       td.addEventListener('contextmenu', onRight);
@@ -141,15 +153,18 @@ function buildTable() {
   }
 }
 
-function cellClass(v) {
-  if (v === 1) return 'filled-cell';
-  if (v === 2) return 'crossed';
-  return 'empty-cell';
+function cellClass(v, r, c) {
+  let base = v === 1 ? 'filled-cell' : v === 2 ? 'crossed' : 'empty-cell';
+  if (r % 5 === 0) base += ' bt';
+  if (c % 5 === 0) base += ' bl';
+  if (r === ROWS - 1) base += ' bb';
+  if (c === COLS - 1) base += ' br';
+  return base;
 }
 function cellText(v) { return v === 2 ? 'x' : ''; }
 
 function applyCell(td, r, c) {
-  td.className = cellClass(state[r][c]);
+  td.className = cellClass(state[r][c], r, c);
   td.textContent = cellText(state[r][c]);
 }
 
