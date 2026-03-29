@@ -4,44 +4,26 @@
 <meta charset="UTF-8"/>
 <title>Flower Nonogram 35x35 — Unsolved</title>
 <style>
-  body { font-family: Arial, sans-serif; background: #f0f4f8; display: flex; flex-direction: column; align-items: center; padding: 30px 10px; }
-  h1 { font-size: 24px; font-weight: 700; color: #2d3748; margin-bottom: 4px; }
-  p { font-size: 14px; color: #718096; margin-bottom: 24px; }
-  .wrap { overflow: auto; max-width: 100%; }
-  table { border-collapse: collapse; }
-  td { width: 18px; height: 18px; min-width: 18px; max-width: 18px; min-height: 18px; max-height: 18px; font-size: 9px; text-align: center; vertical-align: middle; padding: 0; }
-  table { border-collapse: collapse; table-layout: fixed; }
-  td.empty-cell { background: #fff; border: 1px solid #cbd5e0; cursor: pointer; }
-  td.empty-cell:hover { background: #bee3f8; }
-  td.filled-cell { background: #2d3748; border: 1px solid #2d3748; cursor: pointer; }
-  td.crossed { background: #fff; border: 1px solid #cbd5e0; cursor: pointer; color: #e53e3e; font-size: 13px; font-weight: 700; }
-  .bt { border-top: 2.5px solid #4a5568 !important; }
-  .bl { border-left: 2.5px solid #4a5568 !important; }
-  .br { border-right: 2.5px solid #4a5568 !important; }
-  .bb { border-bottom: 2.5px solid #4a5568 !important; }
-  td.clue { background: #edf2f7; color: #2d3748; font-size: 9px; font-weight: 700; padding: 1px 4px; white-space: nowrap; }
-  td.col-clue { vertical-align: bottom; padding-bottom: 4px; width: 18px; max-width: 18px; overflow: hidden; }
-  td.row-clue { text-align: right; padding-right: 6px; width: 56px; min-width: 56px; max-width: 56px; }
-  td.zero { color: #a0aec0; }
-  td.corner { background: #edf2f7; }
-  .controls { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center; }
-  .btn { font-size: 13px; padding: 7px 18px; border-radius: 8px; border: 1px solid #cbd5e0; background: #fff; color: #2d3748; cursor: pointer; font-weight: 600; }
+  body { font-family: Arial, sans-serif; background: #f0f4f8; display: flex; flex-direction: column; align-items: center; padding: 30px 10px; margin: 0; }
+  h1 { font-size: 22px; font-weight: 700; color: #2d3748; margin-bottom: 4px; }
+  p { font-size: 13px; color: #718096; margin-bottom: 16px; }
+  .controls { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; justify-content: center; align-items: center; }
+  .btn { font-size: 13px; padding: 6px 16px; border-radius: 8px; border: 1px solid #cbd5e0; background: #fff; color: #2d3748; cursor: pointer; font-weight: 600; }
   .btn:hover { background: #edf2f7; }
   .btn.mode-fill { background: #2d3748; color: #fff; border-color: #2d3748; }
   .btn.mode-cross { background: #e53e3e; color: #fff; border-color: #e53e3e; }
   .btn.reset { border-color: #fc8181; color: #e53e3e; }
   .btn.check { background: #38a169; color: #fff; border-color: #38a169; }
-  .btn.check:hover { background: #2f855a; }
-  .mode-label { font-size: 13px; color: #718096; display: flex; align-items: center; gap: 6px; }
-  #result-msg { margin-top: 16px; font-size: 15px; font-weight: 700; padding: 10px 24px; border-radius: 10px; display: none; }
-  #result-msg.correct { background: #c6f6d5; color: #22543d; }
-  #result-msg.wrong { background: #fed7d7; color: #742a2a; }
+  #result-msg { margin-bottom: 12px; font-size: 14px; font-weight: 700; padding: 8px 20px; border-radius: 10px; display: none; }
+  #result-msg.correct { background: #c6f6d5; color: #22543d; display: block; }
+  #result-msg.wrong { background: #fed7d7; color: #742a2a; display: block; }
+  canvas { cursor: pointer; display: block; }
+  .mode-label { font-size: 13px; color: #718096; }
 </style>
 </head>
 <body>
 <h1>Flower — 35x35 Nonogram</h1>
-<p>Use the clues to fill in the grid. Click to fill, right-click to mark with X.</p>
-
+<p>Click to fill · Right-click to mark X · Drag to paint</p>
 <div class="controls">
   <span class="mode-label">Mode:</span>
   <button class="btn mode-fill" id="btn-fill" onclick="setMode('fill')">Fill</button>
@@ -50,37 +32,31 @@
   <button class="btn check" onclick="checkSolution()">Check if correct</button>
 </div>
 <div id="result-msg"></div>
-
-<div class="wrap">
-<table id="nono"></table>
-</div>
+<canvas id="c"></canvas>
 
 <script>
 const rowClues = [[0],[0],[0],[5],[5],[5,5,5],[6,5,6],[6,5,6],[6,1,6],[5,5,5],[6,7,6],[6,7,6],[6,9,6],[6,7,6],[6,7,6],[5,5,5],[6,1,6],[6,5,6],[6,5,6],[5,5,5],[5],[5],[2],[2],[2],[16],[14],[12],[10],[8],[2],[2],[2],[2],[2]];
 const colClues = [[0],[0],[0],[0],[0],[0],[5],[5],[3,5,3],[15],[15,1],[15,2],[5,5,3],[5,1,5,4],[5,5],[5,7,5,5],[5,7,5,5],[32],[5,7,18],[5,7,5,5],[5,5],[5,1,5,5],[5,5,4],[15,3],[15,2],[15,1],[3,5,3],[5],[5],[0],[0],[0],[0],[0],[0]];
 const solution = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]];
 
-function checkSolution() {
-  let wrong = 0;
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      const filled = state[r][c] === 1 ? 1 : 0;
-      if (filled !== solution[r][c]) wrong++;
-    }
-  }
-  const msg = document.getElementById('result-msg');
-  msg.style.display = 'block';
-  if (wrong === 0) {
-    msg.className = 'correct';
-    msg.textContent = 'Correct! You solved it perfectly!';
-  } else {
-    msg.className = 'wrong';
-    msg.textContent = `Not quite — ${wrong} cell${wrong > 1 ? 's are' : ' is'} wrong. Keep going!`;
-  }
-}
-
 const ROWS = 35, COLS = 35;
-let state = Array.from({length: ROWS}, () => Array(COLS).fill(0)); // 0=empty, 1=filled, 2=cross
+const CS = 18;
+const maxColH = Math.max(...colClues.map(c => c.length));
+const CLUE_H = maxColH * 16 + 8;
+const CLUE_W = 72;
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const DPR = window.devicePixelRatio || 2;
+const W = CLUE_W + COLS * CS;
+const H = CLUE_H + ROWS * CS;
+canvas.width  = W * DPR;
+canvas.height = H * DPR;
+canvas.style.width  = W + 'px';
+canvas.style.height = H + 'px';
+ctx.scale(DPR, DPR);
+
+let state = Array.from({length: ROWS}, () => Array(COLS).fill(0));
 let mode = 'fill';
 let painting = false, paintVal = null;
 
@@ -92,127 +68,136 @@ function setMode(m) {
 
 function resetGrid() {
   state = Array.from({length: ROWS}, () => Array(COLS).fill(0));
-  renderCells();
+  draw();
 }
 
-const maxColH = Math.max(...colClues.map(c => c.length));
-const tbl = document.getElementById('nono');
+function checkSolution() {
+  let wrong = 0;
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++)
+      if ((state[r][c] === 1 ? 1 : 0) !== solution[r][c]) wrong++;
+  const msg = document.getElementById('result-msg');
+  if (wrong === 0) { msg.className = 'correct'; msg.textContent = 'Correct! You solved it perfectly!'; }
+  else { msg.className = 'wrong'; msg.textContent = `Not quite — ${wrong} cell${wrong > 1 ? 's are' : ' is'} wrong. Keep going!`; }
+}
 
-function buildTable() {
-  tbl.innerHTML = '';
-  // Column clue header rows
-  for (let h = 0; h < maxColH; h++) {
-    const tr = document.createElement('tr');
-    if (h === 0) {
-      const td = document.createElement('td');
-      td.className = 'corner';
-      td.rowSpan = maxColH;
-      td.style.minWidth = '56px';
-      tr.appendChild(td);
-    }
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  // Clue background
+  ctx.fillStyle = '#edf2f7';
+  ctx.fillRect(0, 0, W, CLUE_H);
+  ctx.fillRect(0, 0, CLUE_W, H);
+
+  // Draw grid cells
+  for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
-      const nums = colClues[c];
-      const idx = nums.length - (maxColH - h);
-      const td = document.createElement('td');
-      const val = idx >= 0 ? nums[idx] : '';
-      td.className = 'clue col-clue' + (val === 0 ? ' zero' : '');
-      td.textContent = val !== '' ? val : '';
-      tr.appendChild(td);
+      const x = CLUE_W + c * CS;
+      const y = CLUE_H + r * CS;
+      const v = state[r][c];
+      ctx.fillStyle = v === 1 ? '#2d3748' : '#ffffff';
+      ctx.fillRect(x + 0.5, y + 0.5, CS - 1, CS - 1);
+      if (v === 2) {
+        ctx.strokeStyle = '#e53e3e';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x+3, y+3); ctx.lineTo(x+CS-3, y+CS-3);
+        ctx.moveTo(x+CS-3, y+3); ctx.lineTo(x+3, y+CS-3);
+        ctx.stroke();
+      }
     }
-    tbl.appendChild(tr);
   }
 
-  // Data rows
+  // Thin grid lines
+  ctx.strokeStyle = '#cbd5e0';
+  ctx.lineWidth = 0.5;
+  for (let r = 0; r <= ROWS; r++) {
+    const y = CLUE_H + r * CS;
+    ctx.beginPath(); ctx.moveTo(CLUE_W, y); ctx.lineTo(CLUE_W + COLS * CS, y); ctx.stroke();
+  }
+  for (let c = 0; c <= COLS; c++) {
+    const x = CLUE_W + c * CS;
+    ctx.beginPath(); ctx.moveTo(x, CLUE_H); ctx.lineTo(x, CLUE_H + ROWS * CS); ctx.stroke();
+  }
+
+  // Thick lines every 5
+  ctx.strokeStyle = '#4a5568';
+  ctx.lineWidth = 2;
+  for (let i = 0; i <= ROWS; i += 5) {
+    const y = CLUE_H + i * CS;
+    ctx.beginPath(); ctx.moveTo(CLUE_W, y); ctx.lineTo(CLUE_W + COLS * CS, y); ctx.stroke();
+  }
+  for (let j = 0; j <= COLS; j += 5) {
+    const x = CLUE_W + j * CS;
+    ctx.beginPath(); ctx.moveTo(x, CLUE_H); ctx.lineTo(x, CLUE_H + ROWS * CS); ctx.stroke();
+  }
+
+  // Outer border
+  ctx.strokeStyle = '#2d3748';
+  ctx.lineWidth = 2.5;
+  ctx.strokeRect(CLUE_W, CLUE_H, COLS * CS, ROWS * CS);
+
+  // Row clues
+  ctx.font = 'bold 11px Arial';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
   for (let r = 0; r < ROWS; r++) {
-    const tr = document.createElement('tr');
-    const rc = document.createElement('td');
-    rc.className = 'clue row-clue';
+    const y = CLUE_H + r * CS + CS / 2;
     const nums = rowClues[r];
-    rc.innerHTML = nums[0] === 0
-      ? '<span style="color:#a0aec0">0</span>'
-      : nums.join(' ');
-    tr.appendChild(rc);
-    for (let c = 0; c < COLS; c++) {
-      const td = document.createElement('td');
-      td.dataset.r = r;
-      td.dataset.c = c;
-      td.className = 'empty-cell';
-      // thick borders every 5 cells
-      let extra = '';
-      if (r % 5 === 0) extra += ' bt';
-      if (c % 5 === 0) extra += ' bl';
-      if (r === ROWS - 1) extra += ' bb';
-      if (c === COLS - 1) extra += ' br';
-      td.className = 'empty-cell' + extra;
-      td.addEventListener('mousedown', onDown);
-      td.addEventListener('mouseover', onOver);
-      td.addEventListener('contextmenu', onRight);
-      tr.appendChild(td);
-    }
-    tbl.appendChild(tr);
+    ctx.fillStyle = nums[0] === 0 ? '#a0aec0' : '#2d3748';
+    ctx.fillText(nums.join(' '), CLUE_W - 4, y);
   }
-}
 
-function cellClass(v, r, c) {
-  let base = v === 1 ? 'filled-cell' : v === 2 ? 'crossed' : 'empty-cell';
-  if (r % 5 === 0) base += ' bt';
-  if (c % 5 === 0) base += ' bl';
-  if (r === ROWS - 1) base += ' bb';
-  if (c === COLS - 1) base += ' br';
-  return base;
-}
-function cellText(v) { return v === 2 ? 'x' : ''; }
-
-function applyCell(td, r, c) {
-  td.className = cellClass(state[r][c], r, c);
-  td.textContent = cellText(state[r][c]);
-}
-
-function renderCells() {
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      const td = tbl.rows[maxColH + r].cells[c + 1];
-      applyCell(td, r, c);
+  // Col clues
+  ctx.textAlign = 'center';
+  for (let c = 0; c < COLS; c++) {
+    const x = CLUE_W + c * CS + CS / 2;
+    const nums = colClues[c];
+    for (let i = 0; i < nums.length; i++) {
+      const y = CLUE_H - (nums.length - i) * 16 + 8;
+      ctx.fillStyle = nums[i] === 0 ? '#a0aec0' : '#2d3748';
+      ctx.fillText(nums[i], x, y);
     }
   }
 }
 
-function toggleCell(r, c, useVal) {
-  if (useVal !== null) {
-    state[r][c] = useVal;
-  } else {
-    if (mode === 'fill') state[r][c] = state[r][c] === 1 ? 0 : 1;
-    else state[r][c] = state[r][c] === 2 ? 0 : 2;
-  }
-  const td = tbl.rows[maxColH + r].cells[c + 1];
-  applyCell(td, r, c);
+function getCellFromEvent(e) {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const c = Math.floor((mx - CLUE_W) / CS);
+  const r = Math.floor((my - CLUE_H) / CS);
+  if (r >= 0 && r < ROWS && c >= 0 && c < COLS) return {r, c};
+  return null;
 }
 
-function onDown(e) {
+canvas.addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
   e.preventDefault();
   painting = true;
-  const r = +this.dataset.r, c = +this.dataset.c;
-  if (mode === 'fill') paintVal = state[r][c] === 1 ? 0 : 1;
-  else paintVal = state[r][c] === 2 ? 0 : 2;
-  toggleCell(r, c, paintVal);
-}
-
-function onOver(e) {
+  const cell = getCellFromEvent(e);
+  if (!cell) return;
+  paintVal = mode === 'fill' ? (state[cell.r][cell.c] === 1 ? 0 : 1) : (state[cell.r][cell.c] === 2 ? 0 : 2);
+  state[cell.r][cell.c] = paintVal;
+  draw();
+});
+canvas.addEventListener('mousemove', e => {
   if (!painting) return;
-  const r = +this.dataset.r, c = +this.dataset.c;
-  toggleCell(r, c, paintVal);
-}
-
-function onRight(e) {
+  const cell = getCellFromEvent(e);
+  if (!cell || state[cell.r][cell.c] === paintVal) return;
+  state[cell.r][cell.c] = paintVal;
+  draw();
+});
+canvas.addEventListener('contextmenu', e => {
   e.preventDefault();
-  const r = +this.dataset.r, c = +this.dataset.c;
-  state[r][c] = state[r][c] === 2 ? 0 : 2;
-  applyCell(this, r, c);
-}
-
+  const cell = getCellFromEvent(e);
+  if (!cell) return;
+  state[cell.r][cell.c] = state[cell.r][cell.c] === 2 ? 0 : 2;
+  draw();
+});
 document.addEventListener('mouseup', () => { painting = false; paintVal = null; });
 
-buildTable();
+draw();
 </script>
 </body>
 </html>
