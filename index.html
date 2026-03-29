@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Flower Nonogram 35x35 — Unsolved</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f0f4f8; display: flex; flex-direction: column; align-items: center; padding: 30px 10px; }
+  h1 { font-size: 24px; font-weight: 700; color: #2d3748; margin-bottom: 4px; }
+  p { font-size: 14px; color: #718096; margin-bottom: 24px; }
+  .wrap { overflow: auto; max-width: 100%; }
+  table { border-collapse: collapse; }
+  td { width: 18px; height: 18px; min-width: 18px; font-size: 9px; text-align: center; vertical-align: middle; }
+  td.empty-cell { background: #fff; border: 1px solid #cbd5e0; cursor: pointer; }
+  td.empty-cell:hover { background: #bee3f8; }
+  td.filled-cell { background: #2d3748; border: 1px solid #2d3748; cursor: pointer; }
+  td.crossed { background: #fff; border: 1px solid #cbd5e0; cursor: pointer; color: #e53e3e; font-size: 13px; font-weight: 700; }
+  td.clue { background: #edf2f7; color: #2d3748; font-size: 9px; font-weight: 700; padding: 1px 4px; white-space: nowrap; }
+  td.col-clue { vertical-align: bottom; padding-bottom: 4px; min-width: 18px; }
+  td.row-clue { text-align: right; padding-right: 6px; min-width: 52px; }
+  td.zero { color: #a0aec0; }
+  td.corner { background: #edf2f7; }
+  .controls { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center; }
+  .btn { font-size: 13px; padding: 7px 18px; border-radius: 8px; border: 1px solid #cbd5e0; background: #fff; color: #2d3748; cursor: pointer; font-weight: 600; }
+  .btn:hover { background: #edf2f7; }
+  .btn.mode-fill { background: #2d3748; color: #fff; border-color: #2d3748; }
+  .btn.mode-cross { background: #e53e3e; color: #fff; border-color: #e53e3e; }
+  .btn.reset { border-color: #fc8181; color: #e53e3e; }
+  .mode-label { font-size: 13px; color: #718096; display: flex; align-items: center; gap: 6px; }
+</style>
+</head>
+<body>
+<h1>Flower — 35x35 Nonogram</h1>
+<p>Use the clues to fill in the grid. Click to fill, right-click to mark with X.</p>
+
+<div class="controls">
+  <span class="mode-label">Mode:</span>
+  <button class="btn mode-fill" id="btn-fill" onclick="setMode('fill')">Fill</button>
+  <button class="btn" id="btn-cross" onclick="setMode('cross')">Mark X</button>
+  <button class="btn reset" onclick="resetGrid()">Reset</button>
+</div>
+
+<div class="wrap">
+<table id="nono"></table>
+</div>
+
+<script>
+const rowClues = [[0],[0],[0],[5],[5],[5,5,5],[6,5,6],[6,5,6],[6,1,6],[5,5,5],[6,7,6],[6,7,6],[6,9,6],[6,7,6],[6,7,6],[5,5,5],[6,1,6],[6,5,6],[6,5,6],[5,5,5],[5],[5],[2],[2],[2],[16],[14],[12],[10],[8],[2],[2],[2],[2],[2]];
+const colClues = [[0],[0],[0],[0],[0],[0],[5],[5],[3,5,3],[15],[15,1],[15,2],[5,5,3],[5,1,5,4],[5,5],[5,7,5,5],[5,7,5,5],[32],[5,7,18],[5,7,5,5],[5,5],[5,1,5,5],[5,5,4],[15,3],[15,2],[15,1],[3,5,3],[5],[5],[0],[0],[0],[0],[0],[0]];
+
+const ROWS = 35, COLS = 35;
+let state = Array.from({length: ROWS}, () => Array(COLS).fill(0)); // 0=empty, 1=filled, 2=cross
+let mode = 'fill';
+let painting = false, paintVal = null;
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('btn-fill').className = 'btn' + (m==='fill' ? ' mode-fill' : '');
+  document.getElementById('btn-cross').className = 'btn' + (m==='cross' ? ' mode-cross' : '');
+}
+
+function resetGrid() {
+  state = Array.from({length: ROWS}, () => Array(COLS).fill(0));
+  renderCells();
+}
+
+const maxColH = Math.max(...colClues.map(c => c.length));
+const tbl = document.getElementById('nono');
+
+function buildTable() {
+  tbl.innerHTML = '';
+  // Column clue header rows
+  for (let h = 0; h < maxColH; h++) {
+    const tr = document.createElement('tr');
+    if (h === 0) {
+      const td = document.createElement('td');
+      td.className = 'corner';
+      td.rowSpan = maxColH;
+      td.style.minWidth = '56px';
+      tr.appendChild(td);
+    }
+    for (let c = 0; c < COLS; c++) {
+      const nums = colClues[c];
+      const idx = nums.length - (maxColH - h);
+      const td = document.createElement('td');
+      const val = idx >= 0 ? nums[idx] : '';
+      td.className = 'clue col-clue' + (val === 0 ? ' zero' : '');
+      td.textContent = val !== '' ? val : '';
+      tr.appendChild(td);
+    }
+    tbl.appendChild(tr);
+  }
+
+  // Data rows
+  for (let r = 0; r < ROWS; r++) {
+    const tr = document.createElement('tr');
+    const rc = document.createElement('td');
+    rc.className = 'clue row-clue';
+    const nums = rowClues[r];
+    rc.innerHTML = nums[0] === 0
+      ? '<span style="color:#a0aec0">0</span>'
+      : nums.join(' ');
+    tr.appendChild(rc);
+    for (let c = 0; c < COLS; c++) {
+      const td = document.createElement('td');
+      td.dataset.r = r;
+      td.dataset.c = c;
+      td.className = 'empty-cell';
+      td.addEventListener('mousedown', onDown);
+      td.addEventListener('mouseover', onOver);
+      td.addEventListener('contextmenu', onRight);
+      tr.appendChild(td);
+    }
+    tbl.appendChild(tr);
+  }
+}
+
+function cellClass(v) {
+  if (v === 1) return 'filled-cell';
+  if (v === 2) return 'crossed';
+  return 'empty-cell';
+}
+function cellText(v) { return v === 2 ? 'x' : ''; }
+
+function applyCell(td, r, c) {
+  td.className = cellClass(state[r][c]);
+  td.textContent = cellText(state[r][c]);
+}
+
+function renderCells() {
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const td = tbl.rows[maxColH + r].cells[c + 1];
+      applyCell(td, r, c);
+    }
+  }
+}
+
+function toggleCell(r, c, useVal) {
+  if (useVal !== null) {
+    state[r][c] = useVal;
+  } else {
+    if (mode === 'fill') state[r][c] = state[r][c] === 1 ? 0 : 1;
+    else state[r][c] = state[r][c] === 2 ? 0 : 2;
+  }
+  const td = tbl.rows[maxColH + r].cells[c + 1];
+  applyCell(td, r, c);
+}
+
+function onDown(e) {
+  e.preventDefault();
+  painting = true;
+  const r = +this.dataset.r, c = +this.dataset.c;
+  if (mode === 'fill') paintVal = state[r][c] === 1 ? 0 : 1;
+  else paintVal = state[r][c] === 2 ? 0 : 2;
+  toggleCell(r, c, paintVal);
+}
+
+function onOver(e) {
+  if (!painting) return;
+  const r = +this.dataset.r, c = +this.dataset.c;
+  toggleCell(r, c, paintVal);
+}
+
+function onRight(e) {
+  e.preventDefault();
+  const r = +this.dataset.r, c = +this.dataset.c;
+  state[r][c] = state[r][c] === 2 ? 0 : 2;
+  applyCell(this, r, c);
+}
+
+document.addEventListener('mouseup', () => { painting = false; paintVal = null; });
+
+buildTable();
+</script>
+</body>
+</html>
