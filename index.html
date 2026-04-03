@@ -4,54 +4,31 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>Rabbit — 35×20 Nonogram</title>
+<title>Lighthouse — 40×25 Nonogram</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: Arial, sans-serif;
-    background: #f0f4f8;
-    display: flex; flex-direction: column; align-items: center;
-    padding: 12px 8px 32px;
-    min-height: 100vh;
-  }
+  body { font-family: Arial, sans-serif; background: #f0f4f8; display: flex; flex-direction: column; align-items: center; padding: 12px 8px 32px; min-height: 100vh; }
   h1 { font-size: 17px; font-weight: 700; color: #2d3748; margin-bottom: 3px; text-align: center; }
   .meta { font-size: 11px; color: #718096; margin-bottom: 5px; text-align: center; }
   .tip { font-size: 11px; color: #9F7AEA; margin-bottom: 10px; background: #FAF5FF; padding: 5px 10px; border-radius: 8px; border: 1px solid #E9D8FD; text-align: center; width: 100%; max-width: 500px; }
-  .controls {
-    display: flex; gap: 5px; margin-bottom: 10px;
-    flex-wrap: wrap; justify-content: center; align-items: center;
-    width: 100%; max-width: 500px;
-  }
+  .controls { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center; align-items: center; width: 100%; max-width: 500px; }
   .divider { width: 1px; height: 28px; background: #cbd5e0; margin: 0 3px; }
-  .btn {
-    font-size: 12px; padding: 6px 12px; border-radius: 8px;
-    border: 1px solid #cbd5e0; background: #fff; color: #2d3748;
-    cursor: pointer; font-weight: 600; white-space: nowrap;
-  }
+  .btn { font-size: 12px; padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e0; background: #fff; color: #2d3748; cursor: pointer; font-weight: 600; white-space: nowrap; }
   .btn.active-fill  { background: #2d3748; color: #fff; border-color: #2d3748; }
   .btn.active-cross { background: #555; color: #fff; border-color: #555; }
   .btn.active-clear { background: #718096; color: #fff; border-color: #718096; }
   .btn.check { background: #38a169; color: #fff; border-color: #38a169; }
   .btn.reset { border-color: #fc8181; color: #e53e3e; }
-  #result-msg {
-    margin-bottom: 8px; font-size: 13px; font-weight: 700;
-    padding: 7px 16px; border-radius: 10px; display: none;
-    text-align: center; width: 100%; max-width: 500px;
-  }
+  #result-msg { margin-bottom: 8px; font-size: 13px; font-weight: 700; padding: 7px 16px; border-radius: 10px; display: none; text-align: center; width: 100%; max-width: 500px; }
   #result-msg.correct { background: #c6f6d5; color: #22543d; display: block; }
   #result-msg.wrong   { background: #fed7d7; color: #742a2a; display: block; }
-  #canvas-wrap {
-    width: 100%;
-    overflow-x: auto;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
+  #canvas-wrap { width: 100%; overflow-x: auto; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   canvas { display: block; touch-action: pan-x pan-y; cursor: pointer; }
 </style>
 </head>
 <body>
-<h1>🐰 Rabbit — 35×20 Nonogram</h1>
-<p class="meta">Tight crop · Asymmetric ears · Chain-forcing logic</p>
+<h1>🏠 Lighthouse — 40×25 Nonogram</h1>
+<p class="meta">Seagull · Light beams · Rocks · Waves · Clouds</p>
 <p class="tip">💡 Tap to fill · Swipe to paint · Scroll to see full puzzle</p>
 <div class="controls">
   <button class="btn active-fill" id="btn-fill"  onclick="setMode('fill')">■ Fill</button>
@@ -64,213 +41,66 @@
 </div>
 <div id="result-msg"></div>
 <div id="canvas-wrap"><canvas id="c"></canvas></div>
-
 <script>
-const ROWS = 35, COLS = 20;
+const ROWS=40, COLS=25;
+const rowClues=[[2],[2,3],[1,1,3,2],[8],[7],[5],[2,5,2],[2,5,2],[9],[1,1],[5],[5],[5],[7],[7],[5],[5],[7],[7],[5],[5],[5],[7],[7],[9],[9],[9],[3,3],[3,3],[11],[3,13,3],[7,9,7],[25],[7,2,2,6],[1,3,3,3],[3,5,2,3,4],[1,3,4,2,3,2],[4,6,3,5],[5,3,5,4],[25]];
+const colClues=[[3,3,1],[1,6,1,1],[1,4,1,3],[1,4,4],[1,3,2,2],[9],[1,6,3],[2,2,1,4,1],[1,2,10,3,1],[1,1,2,2,12,4],[6,23,4],[6,17,4,1,2],[6,17,4,1,1],[6,17,4,1,1],[6,23,3],[3,1,2,2,12,4],[2,1,2,10,2,2],[2,2,2,1,2,2],[1,1,3,2,3],[2,4,2,1],[3,3,2,1],[1,10],[6,3],[7,2],[3,2,2]];
+const solution=[[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0],[0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0],[0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,1,1,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,0,1,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,0,0,1,1,1,1,1,0,0,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0],[0,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,0],[1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,0,1,1,0,0,0,0,0,1,1,0,0,1,1,1,1,1,1],[0,1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1,1,0],[1,1,1,0,1,1,1,1,1,0,0,1,1,0,0,0,1,1,1,0,0,1,1,1,1],[1,0,0,1,1,1,0,1,1,1,1,0,0,0,0,1,1,0,0,1,1,1,0,1,1],[1,1,1,1,0,1,1,1,1,1,1,0,0,1,1,1,0,0,1,1,1,1,1,0,0],[0,0,1,1,1,1,1,0,0,1,1,1,0,0,1,1,1,1,1,0,0,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]];
 
-const rowClues = [[0],[2,3],[3,5],[3,5],[2,1,3,2],[2,1,3,2],[2,1,3,2],[4,7],[3,6],[0],[11],[13],[15],[3,7,3],[15],[3,4,4],[13],[11],[9],[11],[13],[15],[7,5],[6,5],[6,5],[18],[18],[16],[1,6,1],[2,8,2],[14],[4,4],[2,2],[0],[0]];
-const colClues = [[7,5],[8,3,7],[2,2,6,11],[5,8,9,3],[3,14,3],[5,12,4],[13,7],[12,6],[12,6],[12,6],[5,6,6],[12,7],[3,9,3,4],[2,8,9,3],[7,6,8,3],[8,3,10],[8,6],[3,2,4],[7],[4]];
-const solution = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0],[1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0],[1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0],[1,1,0,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1],[1,1,0,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1],[1,1,0,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1],[1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1],[0,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0],[0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,0,0,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0],[0,0,1,1,1,0,1,1,1,1,0,1,1,1,1,0,0,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0],[1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0],[1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0],[1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0],[0,0,1,0,0,0,1,1,1,1,1,1,0,0,0,1,0,0,0,0],[0,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0],[0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0],[0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]];
+const maxColH=Math.max(…colClues.map(c=>c.length));
+const CLUE_W=64, CLUE_H=maxColH*15+6;
 
-// ── Fit cell size to screen, minimum 14px, max 22px ──
-const maxColH = Math.max(...colClues.map(c => c.length));
-const CLUE_W = 60;
-const CLUE_H = maxColH * 15 + 6;
+function calcCS(){ return Math.max(14,Math.min(22,Math.floor((Math.min(window.innerWidth-16,600)-CLUE_W)/COLS))); }
+let CS=calcCS(), W=CLUE_W+COLS*CS, H=CLUE_H+ROWS*CS;
+const canvas=document.getElementById(‘c’), ctx=canvas.getContext(‘2d’);
 
-function calcCS() {
-  const available = Math.min(window.innerWidth - 16, 600) - CLUE_W;
-  return Math.max(14, Math.min(22, Math.floor(available / COLS)));
+function resizeCanvas(){ CS=calcCS(); W=CLUE_W+COLS*CS; H=CLUE_H+ROWS*CS; canvas.width=W; canvas.height=H; canvas.style.width=W+‘px’; canvas.style.height=H+‘px’; draw(); }
+
+let state=Array.from({length:ROWS},()=>Array(COLS).fill(0)), mode=‘fill’, painting=false;
+
+function setMode(m){ mode=m; document.getElementById(‘btn-fill’).className=‘btn’+(m===‘fill’?’ active-fill’:’’); document.getElementById(‘btn-cross’).className=‘btn’+(m===‘cross’?’ active-cross’:’’); document.getElementById(‘btn-clear’).className=‘btn’+(m===‘clear’?’ active-clear’:’’); }
+function applyCell(r,c){ if(r<0||r>=ROWS||c<0||c>=COLS)return; if(mode===‘fill’)state[r][c]=1; if(mode===‘cross’)state[r][c]=2; if(mode===‘clear’)state[r][c]=0; }
+function confirmReset(){ if(confirm(‘Reset the entire puzzle?’)){ state=Array.from({length:ROWS},()=>Array(COLS).fill(0)); document.getElementById(‘result-msg’).className=’’; draw(); } }
+function checkSolution(){ let w=0; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(solution[r][c]===1&&state[r][c]!==1)w++; const msg=document.getElementById(‘result-msg’); if(w===0){msg.className=‘correct’;msg.textContent=‘🏠 Perfect! Lighthouse solved!’;}else{msg.className=‘wrong’;msg.textContent=`Not quite — ${w} cell${w>1?'s':''} missing. Keep going!`;} }
+
+function draw(){
+ctx.clearRect(0,0,W,H);
+ctx.fillStyle=’#edf2f7’; ctx.fillRect(0,0,W,CLUE_H); ctx.fillRect(0,0,CLUE_W,H);
+ctx.fillStyle=’#e2e8f0’; ctx.fillRect(0,0,CLUE_W,CLUE_H);
+for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+const x=CLUE_W+c*CS,y=CLUE_H+r*CS,v=state[r][c];
+ctx.fillStyle=v===1?’#2d3748’:(Math.floor(r/5)+Math.floor(c/5))%2===0?’#ffffff’:’#f0f4f8’;
+ctx.fillRect(x+.5,y+.5,CS-1,CS-1);
+if(v===2){ ctx.strokeStyle=’#000’; ctx.lineWidth=Math.max(1.2,CS*0.1); ctx.beginPath(); ctx.moveTo(x+3,y+3); ctx.lineTo(x+CS-3,y+CS-3); ctx.moveTo(x+CS-3,y+3); ctx.lineTo(x+3,y+CS-3); ctx.stroke(); }
+}
+ctx.strokeStyle=’#cbd5e0’; ctx.lineWidth=0.5;
+for(let r=0;r<=ROWS;r++){const y=CLUE_H+r*CS; ctx.beginPath();ctx.moveTo(CLUE_W,y);ctx.lineTo(W,y);ctx.stroke();}
+for(let c=0;c<=COLS;c++){const x=CLUE_W+c*CS; ctx.beginPath();ctx.moveTo(x,CLUE_H);ctx.lineTo(x,H);ctx.stroke();}
+ctx.strokeStyle=’#718096’; ctx.lineWidth=1.5;
+for(let i=0;i<=ROWS;i+=5){const y=CLUE_H+i*CS; ctx.beginPath();ctx.moveTo(CLUE_W,y);ctx.lineTo(W,y);ctx.stroke();}
+for(let j=0;j<=COLS;j+=5){const x=CLUE_W+j*CS; ctx.beginPath();ctx.moveTo(x,CLUE_H);ctx.lineTo(x,H);ctx.stroke();}
+ctx.strokeStyle=’#2d3748’; ctx.lineWidth=2; ctx.strokeRect(CLUE_W,CLUE_H,COLS*CS,ROWS*CS);
+const fs=Math.max(9,Math.min(11,CS-4));
+ctx.font=`bold ${fs}px Arial`; ctx.textAlign=‘right’; ctx.textBaseline=‘middle’;
+for(let r=0;r<ROWS;r++){const y=CLUE_H+r*CS+CS/2,nums=rowClues[r]; ctx.fillStyle=nums[0]===0?’#a0aec0’:’#2d3748’; ctx.fillText(nums.join(’ ‘),CLUE_W-4,y);}
+ctx.textAlign=‘center’; ctx.font=`bold ${Math.max(8,Math.min(11,CS-5))}px Arial`;
+for(let c=0;c<COLS;c++){const x=CLUE_W+c*CS+CS/2,nums=colClues[c]; for(let i=0;i<nums.length;i++){const y=CLUE_H-(nums.length-i)*15+7; ctx.fillStyle=nums[i]===0?’#a0aec0’:’#2d3748’; ctx.fillText(nums[i],x,y);}}
 }
 
-let CS = calcCS();
-let W = CLUE_W + COLS * CS;
-let H = CLUE_H + ROWS * CS;
+function getCell(cx,cy){ const rect=canvas.getBoundingClientRect(),sx=W/rect.width,sy=H/rect.height,c=Math.floor(((cx-rect.left)*sx-CLUE_W)/CS),r=Math.floor(((cy-rect.top)*sy-CLUE_H)/CS); if(r>=0&&r<ROWS&&c>=0&&c<COLS)return{r,c}; return null; }
 
-const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
+canvas.addEventListener(‘mousedown’,e=>{ if(e.button!==0)return; e.preventDefault(); painting=true; const cell=getCell(e.clientX,e.clientY); if(cell){applyCell(cell.r,cell.c);draw();} });
+canvas.addEventListener(‘mousemove’,e=>{ if(!painting)return; const cell=getCell(e.clientX,e.clientY); if(cell){applyCell(cell.r,cell.c);draw();} });
+document.addEventListener(‘mouseup’,()=>{ painting=false; });
+canvas.addEventListener(‘contextmenu’,e=>{ e.preventDefault(); const cell=getCell(e.clientX,e.clientY); if(cell){state[cell.r][cell.c]=0;draw();} });
 
-function resizeCanvas() {
-  CS = calcCS();
-  W = CLUE_W + COLS * CS;
-  H = CLUE_H + ROWS * CS;
-  canvas.width  = W;
-  canvas.height = H;
-  canvas.style.width  = W + 'px';
-  canvas.style.height = H + 'px';
-  draw();
-}
+let lastCell=null;
+canvas.addEventListener(‘touchstart’,e=>{ if(e.touches.length>1)return; const t=e.touches[0],cell=getCell(t.clientX,t.clientY); if(!cell)return; e.preventDefault(); painting=true; lastCell=cell; applyCell(cell.r,cell.c); draw(); },{passive:false});
+canvas.addEventListener(‘touchmove’,e=>{ if(!painting||e.touches.length>1)return; e.preventDefault(); const t=e.touches[0],cell=getCell(t.clientX,t.clientY); if(!cell)return; if(lastCell&&lastCell.r===cell.r&&lastCell.c===cell.c)return; lastCell=cell; applyCell(cell.r,cell.c); draw(); },{passive:false});
+canvas.addEventListener(‘touchend’,()=>{ painting=false; lastCell=null; });
 
-let state    = Array.from({length: ROWS}, () => Array(COLS).fill(0));
-let mode     = 'fill';
-let painting = false;
-
-function setMode(m) {
-  mode = m;
-  document.getElementById('btn-fill').className  = 'btn' + (m === 'fill'  ? ' active-fill'  : '');
-  document.getElementById('btn-cross').className = 'btn' + (m === 'cross' ? ' active-cross' : '');
-  document.getElementById('btn-clear').className = 'btn' + (m === 'clear' ? ' active-clear' : '');
-}
-
-function applyCell(r, c) {
-  if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return;
-  if (mode === 'fill')  state[r][c] = 1;
-  if (mode === 'cross') state[r][c] = 2;
-  if (mode === 'clear') state[r][c] = 0;
-}
-
-function confirmReset() {
-  if (confirm('Reset the entire puzzle?')) {
-    state = Array.from({length: ROWS}, () => Array(COLS).fill(0));
-    document.getElementById('result-msg').className = '';
-    draw();
-  }
-}
-
-function checkSolution() {
-  let wrong = 0;
-  for (let r = 0; r < ROWS; r++)
-    for (let c = 0; c < COLS; c++)
-      if (solution[r][c] === 1 && state[r][c] !== 1) wrong++;
-  const msg = document.getElementById('result-msg');
-  if (wrong === 0) {
-    msg.className = 'correct';
-    msg.textContent = '🐰 Perfect! You solved the Rabbit!';
-  } else {
-    msg.className = 'wrong';
-    msg.textContent = `Not quite — ${wrong} cell${wrong > 1 ? 's' : ''} missing. Keep going!`;
-  }
-}
-
-function draw() {
-  ctx.clearRect(0, 0, W, H);
-
-  // backgrounds
-  ctx.fillStyle = '#edf2f7'; ctx.fillRect(0, 0, W, CLUE_H);
-  ctx.fillStyle = '#edf2f7'; ctx.fillRect(0, 0, CLUE_W, H);
-  ctx.fillStyle = '#e2e8f0'; ctx.fillRect(0, 0, CLUE_W, CLUE_H);
-
-  // cells
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      const x = CLUE_W + c * CS, y = CLUE_H + r * CS, v = state[r][c];
-      ctx.fillStyle = v === 1 ? '#2d3748'
-        : (Math.floor(r / 5) + Math.floor(c / 5)) % 2 === 0 ? '#ffffff' : '#f0f4f8';
-      ctx.fillRect(x + 0.5, y + 0.5, CS - 1, CS - 1);
-      if (v === 2) {
-        ctx.strokeStyle = '#000000'; ctx.lineWidth = Math.max(1.2, CS * 0.1);
-        ctx.beginPath();
-        ctx.moveTo(x + 3, y + 3);      ctx.lineTo(x + CS - 3, y + CS - 3);
-        ctx.moveTo(x + CS - 3, y + 3); ctx.lineTo(x + 3, y + CS - 3);
-        ctx.stroke();
-      }
-    }
-  }
-
-  // thin grid lines
-  ctx.strokeStyle = '#cbd5e0'; ctx.lineWidth = 0.5;
-  for (let r = 0; r <= ROWS; r++) {
-    const y = CLUE_H + r * CS;
-    ctx.beginPath(); ctx.moveTo(CLUE_W, y); ctx.lineTo(W, y); ctx.stroke();
-  }
-  for (let c = 0; c <= COLS; c++) {
-    const x = CLUE_W + c * CS;
-    ctx.beginPath(); ctx.moveTo(x, CLUE_H); ctx.lineTo(x, H); ctx.stroke();
-  }
-
-  // bold 5x5 guides
-  ctx.strokeStyle = '#718096'; ctx.lineWidth = 1.5;
-  for (let i = 0; i <= ROWS; i += 5) {
-    const y = CLUE_H + i * CS;
-    ctx.beginPath(); ctx.moveTo(CLUE_W, y); ctx.lineTo(W, y); ctx.stroke();
-  }
-  for (let j = 0; j <= COLS; j += 5) {
-    const x = CLUE_W + j * CS;
-    ctx.beginPath(); ctx.moveTo(x, CLUE_H); ctx.lineTo(x, H); ctx.stroke();
-  }
-
-  // outer border
-  ctx.strokeStyle = '#2d3748'; ctx.lineWidth = 2;
-  ctx.strokeRect(CLUE_W, CLUE_H, COLS * CS, ROWS * CS);
-
-  // row clues
-  const fs = Math.max(9, Math.min(11, CS - 4));
-  ctx.font = `bold ${fs}px Arial`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-  for (let r = 0; r < ROWS; r++) {
-    const y = CLUE_H + r * CS + CS / 2, nums = rowClues[r];
-    ctx.fillStyle = nums[0] === 0 ? '#a0aec0' : '#2d3748';
-    ctx.fillText(nums.join(' '), CLUE_W - 4, y);
-  }
-
-  // col clues
-  ctx.textAlign = 'center';
-  const clueFontSize = Math.max(8, Math.min(11, CS - 5));
-  ctx.font = `bold ${clueFontSize}px Arial`;
-  for (let c = 0; c < COLS; c++) {
-    const x = CLUE_W + c * CS + CS / 2, nums = colClues[c];
-    for (let i = 0; i < nums.length; i++) {
-      const y = CLUE_H - (nums.length - i) * 15 + 7;
-      ctx.fillStyle = nums[i] === 0 ? '#a0aec0' : '#2d3748';
-      ctx.fillText(nums[i], x, y);
-    }
-  }
-}
-
-function getCell(clientX, clientY) {
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = W / rect.width;
-  const scaleY = H / rect.height;
-  const c = Math.floor(((clientX - rect.left) * scaleX - CLUE_W) / CS);
-  const r = Math.floor(((clientY - rect.top)  * scaleY - CLUE_H) / CS);
-  if (r >= 0 && r < ROWS && c >= 0 && c < COLS) return { r, c };
-  return null;
-}
-
-// Mouse
-canvas.addEventListener('mousedown', e => {
-  if (e.button !== 0) return;
-  e.preventDefault(); painting = true;
-  const cell = getCell(e.clientX, e.clientY);
-  if (cell) { applyCell(cell.r, cell.c); draw(); }
-});
-canvas.addEventListener('mousemove', e => {
-  if (!painting) return;
-  const cell = getCell(e.clientX, e.clientY);
-  if (cell) { applyCell(cell.r, cell.c); draw(); }
-});
-document.addEventListener('mouseup', () => { painting = false; });
-canvas.addEventListener('contextmenu', e => {
-  e.preventDefault();
-  const cell = getCell(e.clientX, e.clientY);
-  if (cell) { state[cell.r][cell.c] = 0; draw(); }
-});
-
-// Touch — single finger taps/paints, scrolling handled by the wrapper
-let lastTouchCell = null;
-canvas.addEventListener('touchstart', e => {
-  if (e.touches.length > 1) return; // let pinch-scroll work
-  const t = e.touches[0];
-  const cell = getCell(t.clientX, t.clientY);
-  if (!cell) return;
-  e.preventDefault(); painting = true;
-  lastTouchCell = cell;
-  applyCell(cell.r, cell.c); draw();
-}, { passive: false });
-
-canvas.addEventListener('touchmove', e => {
-  if (!painting || e.touches.length > 1) return;
-  e.preventDefault();
-  const t = e.touches[0];
-  const cell = getCell(t.clientX, t.clientY);
-  if (!cell) return;
-  if (lastTouchCell && lastTouchCell.r === cell.r && lastTouchCell.c === cell.c) return;
-  lastTouchCell = cell;
-  applyCell(cell.r, cell.c); draw();
-}, { passive: false });
-
-canvas.addEventListener('touchend', () => { painting = false; lastTouchCell = null; });
-
-window.addEventListener('resize', resizeCanvas);
-window.addEventListener('load', resizeCanvas);
+window.addEventListener(‘resize’,resizeCanvas);
+window.addEventListener(‘load’,resizeCanvas);
 resizeCanvas();
 </script>
 
