@@ -3,207 +3,159 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<title>Rabbit — 35x35 Nonogram</title>
+<title>Rabbit — 35x20 Nonogram</title>
 <style>
   body { font-family: Arial, sans-serif; background: #f0f4f8; display: flex; flex-direction: column; align-items: center; padding: 24px 10px; margin: 0; }
   h1 { font-size: 20px; font-weight: 700; color: #2d3748; margin-bottom: 4px; }
   .meta { font-size: 13px; color: #718096; margin-bottom: 6px; }
   .tip { font-size: 12px; color: #9F7AEA; margin-bottom: 16px; background: #FAF5FF; padding: 6px 14px; border-radius: 8px; border: 1px solid #E9D8FD; }
-  .controls { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; justify-content: center; align-items: center; }
-  .btn { font-size: 13px; padding: 6px 16px; border-radius: 8px; border: 1px solid #cbd5e0; background: #fff; color: #2d3748; cursor: pointer; font-weight: 600; }
+  .controls { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; justify-content: center; align-items: center; }
+  .controls .divider { width: 1px; height: 32px; background: #cbd5e0; margin: 0 6px; }
+  .btn { font-size: 13px; padding: 7px 16px; border-radius: 8px; border: 1px solid #cbd5e0; background: #fff; color: #2d3748; cursor: pointer; font-weight: 600; }
   .btn:hover { background: #edf2f7; }
-  .btn.mode-fill { background: #2d3748; color: #fff; border-color: #2d3748; }
-  .btn.mode-cross { background: #e53e3e; color: #fff; border-color: #e53e3e; }
-  .btn.reset { border-color: #fc8181; color: #e53e3e; }
-  .btn.check { background: #38a169; color: #fff; border-color: #38a169; }
+  .btn.active-fill  { background: #2d3748; color: #fff; border-color: #2d3748; }
+  .btn.active-cross { background: #e53e3e; color: #fff; border-color: #e53e3e; }
+  .btn.active-clear { background: #718096; color: #fff; border-color: #718096; }
+  .btn.check  { background: #38a169; color: #fff; border-color: #38a169; }
+  .btn.reset  { border-color: #fc8181; color: #e53e3e; }
   #result-msg { margin-bottom: 12px; font-size: 14px; font-weight: 700; padding: 8px 20px; border-radius: 10px; display: none; }
   #result-msg.correct { background: #c6f6d5; color: #22543d; display: block; }
-  #result-msg.wrong { background: #fed7d7; color: #742a2a; display: block; }
-  canvas { cursor: pointer; display: block; }
+  #result-msg.wrong   { background: #fed7d7; color: #742a2a; display: block; }
+  canvas { cursor: pointer; display: block; touch-action: none; }
 </style>
 </head>
 <body>
-<h1>🐰 Rabbit — 35x35 Nonogram</h1>
-<p class="meta">Asymmetric design · Chain-forcing logic · 32/35 non-trivial rows</p>
-<p class="tip">💡 Tip: Left click to fill, right click to mark ✕. Some cells only solvable by combining row AND column clues!</p>
+<h1>🐰 Rabbit — 35×20 Nonogram</h1>
+<p class="meta">Tight crop · Asymmetric ears · Chain-forcing logic</p>
+<p class="tip">💡 Swipe to paint! Fill fills, ✕ marks, Clear erases — no accidental unmarking.</p>
 <div class="controls">
-  <button class="btn mode-fill" id="btn-fill" onclick="setMode('fill')">■ Fill</button>
-  <button class="btn" id="btn-cross" onclick="setMode('cross')">✕ Mark</button>
-  <button class="btn reset" onclick="resetGrid()">Reset</button>
+  <button class="btn active-fill" id="btn-fill"  onclick="setMode('fill')">■ Fill</button>
+  <button class="btn"             id="btn-cross" onclick="setMode('cross')">✕ Mark</button>
+  <button class="btn"             id="btn-clear" onclick="setMode('clear')">◻ Clear</button>
+  <div class="divider"></div>
   <button class="btn check" onclick="checkSolution()">Check Puzzle</button>
+  <div class="divider"></div>
+  <button class="btn reset" onclick="confirmReset()">↺ Reset</button>
 </div>
 <div id="result-msg"></div>
 <canvas id="c"></canvas>
-
 <script>
-const rowClues = [[0],[2,3],[3,5],[3,5],[2,1,3,2],[2,1,3,2],[2,1,3,2],[4,7],[3,6],[0],[11],[13],[15],[3,7,3],[15],[3,4,4],[13],[11],[9],[11],[13],[15],[7,5],[6,5],[6,5],[18],[18],[16],[1,6,1],[2,8,2],[14],[4,4],[2,2],[0],[0]];
-const colClues = [[0],[0],[0],[0],[0],[0],[0],[7,5],[8,3,7],[2,2,6,11],[5,8,9,3],[3,14,3],[5,12,4],[13,7],[12,6],[12,6],[12,6],[5,6,6],[12,7],[3,9,3,4],[2,8,9,3],[7,6,8,3],[8,3,10],[8,6],[3,2,4],[7],[4],[0],[0],[0],[0],[0],[0],[0],[0]];
-const solution = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,0,1,1,1,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,1,1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]];
+const ROWS=35, COLS=20, CS=20;
 
-const ROWS=35, COLS=35, CS=18;
-const maxColH = Math.max(...colClues.map(c=>c.length));
+const rowClues = [[0],[2,3],[3,5],[3,5],[2,1,3,2],[2,1,3,2],[2,1,3,2],[4,7],[3,6],[0],[11],[13],[15],[3,7,3],[15],[3,4,4],[13],[11],[9],[11],[13],[15],[7,5],[6,5],[6,5],[18],[18],[16],[1,6,1],[2,8,2],[14],[4,4],[2,2],[0],[0]];
+const colClues = [[7,5],[8,3,7],[2,2,6,11],[5,8,9,3],[3,14,3],[5,12,4],[13,7],[12,6],[12,6],[12,6],[5,6,6],[12,7],[3,9,3,4],[2,8,9,3],[7,6,8,3],[8,3,10],[8,6],[3,2,4],[7],[4]];
+const solution = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0],[1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0],[1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0],[1,1,0,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1],[1,1,0,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1],[1,1,0,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1],[1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1],[0,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0],[0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,0,0,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0],[0,0,1,1,1,0,1,1,1,1,0,1,1,1,1,0,0,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0],[1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0],[1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0],[1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0],[0,0,1,0,0,0,1,1,1,1,1,1,0,0,0,1,0,0,0,0],[0,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0],[0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0],[0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]];
+
+const maxColH = Math.max(…colClues.map(c=>c.length));
 const CLUE_H = maxColH*16+8, CLUE_W = 68;
-const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById(‘c’);
+const ctx = canvas.getContext(‘2d’);
 const DPR = window.devicePixelRatio||2;
 const W = CLUE_W+COLS*CS, H = CLUE_H+ROWS*CS;
 canvas.width=W*DPR; canvas.height=H*DPR;
-canvas.style.width=W+'px'; canvas.style.height=H+'px';
+canvas.style.width=W+‘px’; canvas.style.height=H+‘px’;
 ctx.scale(DPR,DPR);
 
 let state = Array.from({length:ROWS},()=>Array(COLS).fill(0));
-let mode = 'fill', painting = false, paintVal = null;
+let mode=‘fill’, painting=false;
 
 function setMode(m){
-  mode=m;
-  document.getElementById('btn-fill').className='btn'+(m==='fill'?' mode-fill':'');
-  document.getElementById('btn-cross').className='btn'+(m==='cross'?' mode-cross':'');
+mode=m;
+document.getElementById(‘btn-fill’).className  = ‘btn’+(m===‘fill’  ? ’ active-fill’  : ‘’);
+document.getElementById(‘btn-cross’).className = ‘btn’+(m===‘cross’ ? ’ active-cross’ : ‘’);
+document.getElementById(‘btn-clear’).className = ‘btn’+(m===‘clear’ ? ’ active-clear’ : ‘’);
 }
 
-function resetGrid(){
-  state=Array.from({length:ROWS},()=>Array(COLS).fill(0));
-  document.getElementById('result-msg').className='';
-  draw();
+function applyCell(r,c){
+if(r<0||r>=ROWS||c<0||c>=COLS) return;
+if(mode===‘fill’)  state[r][c]=1;
+if(mode===‘cross’) state[r][c]=2;
+if(mode===‘clear’) state[r][c]=0;
+}
+
+function confirmReset(){
+if(confirm(‘Reset the entire puzzle? This cannot be undone.’)){
+state=Array.from({length:ROWS},()=>Array(COLS).fill(0));
+document.getElementById(‘result-msg’).className=’’;
+draw();
+}
 }
 
 function checkSolution(){
-  let wrong=0;
-  for(let r=0;r<ROWS;r++)
-    for(let c=0;c<COLS;c++)
-      if(solution[r][c]===1 && state[r][c]!==1) wrong++;
-  const msg=document.getElementById('result-msg');
-  if(wrong===0){
-    msg.className='correct';
-    msg.textContent='🐰 Perfect! You solved the Rabbit!';
-  } else {
-    msg.className='wrong';
-    msg.textContent=`Not quite — ${wrong} filled cell${wrong>1?'s are':' is'} missing or wrong. Keep going!`;
-  }
+let wrong=0;
+for(let r=0;r<ROWS;r++)
+for(let c=0;c<COLS;c++)
+if(solution[r][c]===1 && state[r][c]!==1) wrong++;
+const msg=document.getElementById(‘result-msg’);
+if(wrong===0){ msg.className=‘correct’; msg.textContent=‘🐰 Perfect! You solved the Rabbit!’; }
+else { msg.className=‘wrong’; msg.textContent=`Not quite — ${wrong} filled cell${wrong>1?'s are':' is'} missing. Keep going!`; }
 }
 
 function draw(){
-  ctx.clearRect(0,0,W,H);
+ctx.clearRect(0,0,W,H);
+ctx.fillStyle=’#edf2f7’; ctx.fillRect(0,0,W,CLUE_H);
+ctx.fillStyle=’#edf2f7’; ctx.fillRect(0,0,CLUE_W,H);
+ctx.fillStyle=’#e2e8f0’; ctx.fillRect(0,0,CLUE_W,CLUE_H);
 
-  // clue backgrounds
-  ctx.fillStyle='#edf2f7';
-  ctx.fillRect(0,0,W,CLUE_H);
-  ctx.fillRect(0,0,CLUE_W,H);
-  ctx.fillStyle='#e2e8f0';
-  ctx.fillRect(0,0,CLUE_W,CLUE_H);
+for(let r=0;r<ROWS;r++){
+for(let c=0;c<COLS;c++){
+const x=CLUE_W+c*CS, y=CLUE_H+r*CS, v=state[r][c];
+ctx.fillStyle = v===1 ? ‘#2d3748’ : (Math.floor(r/5)+Math.floor(c/5))%2===0 ? ‘#ffffff’ : ‘#f8fafc’;
+ctx.fillRect(x+.5,y+.5,CS-1,CS-1);
+if(v===2){
+ctx.strokeStyle=’#e53e3e’; ctx.lineWidth=1.8;
+ctx.beginPath();
+ctx.moveTo(x+3,y+3); ctx.lineTo(x+CS-3,y+CS-3);
+ctx.moveTo(x+CS-3,y+3); ctx.lineTo(x+3,y+CS-3);
+ctx.stroke();
+}
+}
+}
 
-  // cells
-  for(let r=0;r<ROWS;r++){
-    for(let c=0;c<COLS;c++){
-      const x=CLUE_W+c*CS, y=CLUE_H+r*CS, v=state[r][c];
-      // alternating subtle bg for readability
-      if(v===0){
-        ctx.fillStyle = (Math.floor(r/5)+Math.floor(c/5))%2===0 ? '#ffffff' : '#f8fafc';
-      } else {
-        ctx.fillStyle = '#2d3748';
-      }
-      ctx.fillRect(x+.5,y+.5,CS-1,CS-1);
-      if(v===2){
-        ctx.strokeStyle='#e53e3e'; ctx.lineWidth=1.8;
-        ctx.beginPath();
-        ctx.moveTo(x+3,y+3); ctx.lineTo(x+CS-3,y+CS-3);
-        ctx.moveTo(x+CS-3,y+3); ctx.lineTo(x+3,y+CS-3);
-        ctx.stroke();
-      }
-    }
-  }
+ctx.strokeStyle=’#cbd5e0’; ctx.lineWidth=0.5;
+for(let r=0;r<=ROWS;r++){ const y=CLUE_H+r*CS; ctx.beginPath(); ctx.moveTo(CLUE_W,y); ctx.lineTo(CLUE_W+COLS*CS,y); ctx.stroke(); }
+for(let c=0;c<=COLS;c++){ const x=CLUE_W+c*CS; ctx.beginPath(); ctx.moveTo(x,CLUE_H); ctx.lineTo(x,CLUE_H+ROWS*CS); ctx.stroke(); }
 
-  // thin grid lines
-  ctx.strokeStyle='#cbd5e0'; ctx.lineWidth=0.5;
-  for(let r=0;r<=ROWS;r++){
-    const y=CLUE_H+r*CS;
-    ctx.beginPath(); ctx.moveTo(CLUE_W,y); ctx.lineTo(CLUE_W+COLS*CS,y); ctx.stroke();
-  }
-  for(let c=0;c<=COLS;c++){
-    const x=CLUE_W+c*CS;
-    ctx.beginPath(); ctx.moveTo(x,CLUE_H); ctx.lineTo(x,CLUE_H+ROWS*CS); ctx.stroke();
-  }
+ctx.strokeStyle=’#718096’; ctx.lineWidth=1.5;
+for(let i=0;i<=ROWS;i+=5){ const y=CLUE_H+i*CS; ctx.beginPath(); ctx.moveTo(CLUE_W,y); ctx.lineTo(CLUE_W+COLS*CS,y); ctx.stroke(); }
+for(let j=0;j<=COLS;j+=5){ const x=CLUE_W+j*CS; ctx.beginPath(); ctx.moveTo(x,CLUE_H); ctx.lineTo(x,CLUE_H+ROWS*CS); ctx.stroke(); }
 
-  // bold 5x5 guide lines
-  ctx.strokeStyle='#718096'; ctx.lineWidth=1.5;
-  for(let i=0;i<=ROWS;i+=5){
-    const y=CLUE_H+i*CS;
-    ctx.beginPath(); ctx.moveTo(CLUE_W,y); ctx.lineTo(CLUE_W+COLS*CS,y); ctx.stroke();
-  }
-  for(let j=0;j<=COLS;j+=5){
-    const x=CLUE_W+j*CS;
-    ctx.beginPath(); ctx.moveTo(x,CLUE_H); ctx.lineTo(x,CLUE_H+ROWS*CS); ctx.stroke();
-  }
+ctx.strokeStyle=’#2d3748’; ctx.lineWidth=2.5;
+ctx.strokeRect(CLUE_W,CLUE_H,COLS*CS,ROWS*CS);
 
-  // outer border
-  ctx.strokeStyle='#2d3748'; ctx.lineWidth=2.5;
-  ctx.strokeRect(CLUE_W,CLUE_H,COLS*CS,ROWS*CS);
-
-  // row clues
-  ctx.font='bold 11px Arial'; ctx.textAlign='right'; ctx.textBaseline='middle';
-  for(let r=0;r<ROWS;r++){
-    const y=CLUE_H+r*CS+CS/2;
-    const nums=rowClues[r];
-    ctx.fillStyle=nums[0]===0?'#a0aec0':'#2d3748';
-    ctx.fillText(nums.join(' '),CLUE_W-5,y);
-  }
-
-  // col clues
-  ctx.textAlign='center';
-  for(let c=0;c<COLS;c++){
-    const x=CLUE_W+c*CS+CS/2;
-    const nums=colClues[c];
-    for(let i=0;i<nums.length;i++){
-      const y=CLUE_H-(nums.length-i)*16+8;
-      ctx.fillStyle=nums[i]===0?'#a0aec0':'#2d3748';
-      ctx.fillText(nums[i],x,y);
-    }
-  }
+ctx.font=‘bold 11px Arial’; ctx.textAlign=‘right’; ctx.textBaseline=‘middle’;
+for(let r=0;r<ROWS;r++){
+const y=CLUE_H+r*CS+CS/2, nums=rowClues[r];
+ctx.fillStyle=nums[0]===0?’#a0aec0’:’#2d3748’;
+ctx.fillText(nums.join(’ ’),CLUE_W-5,y);
+}
+ctx.textAlign=‘center’;
+for(let c=0;c<COLS;c++){
+const x=CLUE_W+c*CS+CS/2, nums=colClues[c];
+for(let i=0;i<nums.length;i++){
+const y=CLUE_H-(nums.length-i)*16+8;
+ctx.fillStyle=nums[i]===0?’#a0aec0’:’#2d3748’;
+ctx.fillText(nums[i],x,y);
+}
+}
 }
 
 function getCell(e){
-  const rect=canvas.getBoundingClientRect();
-  const scaleX=canvas.width/DPR/rect.width;
-  const scaleY=canvas.height/DPR/rect.height;
-  const c=Math.floor(((e.clientX-rect.left)*scaleX-CLUE_W)/CS);
-  const r=Math.floor(((e.clientY-rect.top)*scaleY-CLUE_H)/CS);
-  if(r>=0&&r<ROWS&&c>=0&&c<COLS) return{r,c};
-  return null;
+const rect=canvas.getBoundingClientRect();
+const sx=canvas.width/DPR/rect.width, sy=canvas.height/DPR/rect.height;
+const c=Math.floor(((e.clientX-rect.left)*sx-CLUE_W)/CS);
+const r=Math.floor(((e.clientY-rect.top)*sy-CLUE_H)/CS);
+if(r>=0&&r<ROWS&&c>=0&&c<COLS) return{r,c};
+return null;
 }
 
-canvas.addEventListener('mousedown',e=>{
-  if(e.button!==0) return;
-  e.preventDefault(); painting=true;
-  const cell=getCell(e); if(!cell) return;
-  paintVal=mode==='fill'?(state[cell.r][cell.c]===1?0:1):(state[cell.r][cell.c]===2?0:2);
-  state[cell.r][cell.c]=paintVal; draw();
-});
-canvas.addEventListener('mousemove',e=>{
-  if(!painting) return;
-  const cell=getCell(e);
-  if(!cell||state[cell.r][cell.c]===paintVal) return;
-  state[cell.r][cell.c]=paintVal; draw();
-});
-canvas.addEventListener('contextmenu',e=>{
-  e.preventDefault();
-  const cell=getCell(e); if(!cell) return;
-  state[cell.r][cell.c]=state[cell.r][cell.c]===2?0:2; draw();
-});
-document.addEventListener('mouseup',()=>{painting=false; paintVal=null;});
-canvas.addEventListener('touchstart',e=>{
-  e.preventDefault();
-  const t=e.touches[0];
-  const cell=getCell(t); if(!cell) return;
-  paintVal=mode==='fill'?(state[cell.r][cell.c]===1?0:1):(state[cell.r][cell.c]===2?0:2);
-  state[cell.r][cell.c]=paintVal; painting=true; draw();
-},{passive:false});
-canvas.addEventListener('touchmove',e=>{
-  e.preventDefault();
-  if(!painting) return;
-  const cell=getCell(e.touches[0]);
-  if(!cell||state[cell.r][cell.c]===paintVal) return;
-  state[cell.r][cell.c]=paintVal; draw();
-},{passive:false});
-canvas.addEventListener('touchend',()=>{painting=false; paintVal=null;});
+canvas.addEventListener(‘mousedown’,e=>{ if(e.button!==0) return; e.preventDefault(); painting=true; const cell=getCell(e); if(cell){applyCell(cell.r,cell.c);draw();} });
+canvas.addEventListener(‘mousemove’,e=>{ if(!painting) return; const cell=getCell(e); if(cell){applyCell(cell.r,cell.c);draw();} });
+document.addEventListener(‘mouseup’,()=>{ painting=false; });
+canvas.addEventListener(‘contextmenu’,e=>{ e.preventDefault(); const cell=getCell(e); if(cell){state[cell.r][cell.c]=0;draw();} });
+canvas.addEventListener(‘touchstart’,e=>{ e.preventDefault(); painting=true; const cell=getCell(e.touches[0]); if(cell){applyCell(cell.r,cell.c);draw();} },{passive:false});
+canvas.addEventListener(‘touchmove’,e=>{ e.preventDefault(); if(!painting) return; const cell=getCell(e.touches[0]); if(cell){applyCell(cell.r,cell.c);draw();} },{passive:false});
+canvas.addEventListener(‘touchend’,()=>{ painting=false; });
 
 draw();
 </script>
